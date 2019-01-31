@@ -1,0 +1,36 @@
+{
+  "name": "hgbasm-cli",
+  "version": "0.1.0",
+  "description": "A command-line wrapper around hgbasm which mirrors the RGBDS command-line utilities.",
+  "main": "main.js",
+  "scripts": {
+    "prepare": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hawkbat/hgbasm-cli.git"
+  },
+  "author": "Joshua Thome",
+  "license": "MIT",
+  "bin": {
+    "hgbasm": "./hgbasm.js",
+    "hgblink": "./hgblink.js",
+    "hgbfix": "./hgbfix.js"
+  },
+  "bugs": {
+    "url": "https://github.com/Hawkbat/hgbasm-cli/issues"
+  },
+  "homepage": "https://github.com/Hawkbat/hgbasm-cli#readme",
+  "dependencies": {
+    "@types/fs-extra": "^5.0.4",
+    "@types/glob": "^7.1.1",
+    "commander": "^2.19.0",
+    "fs-extra": "^7.0.1",
+    "glob": "^7.1.3",
+    "hgbasm": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.18",
+    "typescript": "^3.2.4"
+  }
+}

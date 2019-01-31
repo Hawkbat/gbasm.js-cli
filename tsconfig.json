@@ -1,0 +1,24 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"target": "es5",
+		"lib": [
+			"esnext"
+		],
+		"downlevelIteration": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"plugins": [
+			{
+				"name": "typescript-tslint-plugin",
+				"ignoreDefinitionFiles": true,
+				"configFile": "./tslint.json"
+			}
+		]
+	}
+}
