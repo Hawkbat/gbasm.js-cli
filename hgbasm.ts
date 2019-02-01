@@ -42,13 +42,27 @@ async function run(): Promise<void> {
 
         const provider: gbasm.IFileProvider = {
             retrieve: async (path, binary) => {
+                try {
+                    const filePath = pathUtil.resolve(rootFolder, path)
+                    const file = await fs.readFile(filePath, binary ? 'binary' : 'utf8')
+                    return new gbasm.AsmFile(pathUtil.relative(rootFolder, filePath), file)
+                } catch (_) {
+                    // file does not exist or could not be accessed; continue
+                }
+                try {
+                    const filePath = pathUtil.resolve(pathUtil.dirname(sourcePath), path)
+                    const file = await fs.readFile(filePath, binary ? 'binary' : 'utf8')
+                    return new gbasm.AsmFile(pathUtil.relative(rootFolder, filePath), file)
+                } catch (_) {
+                    // file does not exist or could not be accessed; continue
+                }
                 for (const incPath of includeFolders) {
                     try {
                         const filePath = pathUtil.resolve(incPath, path)
                         const file = await fs.readFile(filePath, binary ? 'binary' : 'utf8')
-                        return new gbasm.AsmFile(pathUtil.relative(incPath, filePath), file)
+                        return new gbasm.AsmFile(pathUtil.relative(rootFolder, filePath), file)
                     } catch (_) {
-                        // file does not exist or could not be accessed; try next include path
+                        // file does not exist or could not be accessed; continue
                     }
                 }
                 return null
