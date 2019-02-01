@@ -22,7 +22,7 @@ program
     .option('-h, --no-halt-nop', 'By default, gbasm inserts a ‘nop’ instruction immediately after any ‘halt’ instruction. The -h option disables this behavior.')
     .option('-i, --include <path>', 'Add an include path.', (arg) => includeFolders.push(arg))
     .option('-L, --no-ld-ldh', 'Disable the optimization that turns loads of the form LD [$FF00+n8],A into the opcode LDH [$FF00+n8],A in order to have full control of the result in the final ROM.')
-    .option('-M, --depfile <dependfile>', 'Print make(1) dependencies to dependfile. Not yet supported.')
+    .option('-M, --depfile <dependfile>', 'Print make(1) dependencies to dependfile.')
     .option('-o, --out <outfile>', 'Write an object file to the given filename.')
     .option('-p, --pad <pad_value>', 'When padding an image, pad with this value. The default is 0x00.')
     .option('-v, --verbose', 'Be verbose.')
@@ -73,6 +73,17 @@ async function run(): Promise<void> {
             debugDefineName: debugName,
             debugDefineValue: debugValue
         }, new gbasm.FileContext(asmFile), provider))
+
+        if (program.depfile) {
+            if (program.out) {
+                const deps = result.dependencies
+                deps.unshift(pathUtil.relative(rootFolder, sourcePath))
+                const lines = deps.map((d) => `${pathUtil.relative(rootFolder, program.out)}: ${d}`)
+                fs.writeFileSync(program.depfile, lines.join('\n'))
+            } else {
+                console.error('Cannot generate a dependency file without an object file path')
+            }
+        }
 
         if (program.out && !result.diagnostics.some((d) => d.type === 'error')) {
             fs.writeFileSync(program.out, gbasm.writeObjectFile(result.objectFile))
