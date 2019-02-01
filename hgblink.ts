@@ -61,6 +61,18 @@ async function run(): Promise<void> {
             fs.writeFileSync(program.out, result.romFile)
         }
 
+        for (const diag of result.diagnostics.filter((d) => d.type === 'info')) {
+            logger.log('diagnosticInfo', diag.toString())
+        }
+
+        for (const diag of result.diagnostics.filter((d) => d.type === 'warn')) {
+            logger.log('diagnosticWarn', diag.toString())
+        }
+
+        for (const diag of result.diagnostics.filter((d) => d.type === 'error')) {
+            logger.log('diagnosticError', diag.toString())
+        }
+
         const errorCount = result.diagnostics.filter((diag) => diag.type === 'error').length
         const warnCount = result.diagnostics.filter((diag) => diag.type === 'warn').length
 
