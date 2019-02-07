@@ -31,7 +31,7 @@ program
 
 if (!sourcePath) {
     console.error('No source file specified, exiting')
-    process.exit(1)
+    process.exit(-1)
 }
 
 async function run(): Promise<void> {
@@ -95,7 +95,7 @@ async function run(): Promise<void> {
                 const lines = deps.map((d) => `${pathUtil.relative(rootFolder, program.out)}: ${d}`)
                 fs.writeFileSync(program.depfile, lines.join('\n'))
             } else {
-                console.error('Cannot generate a dependency file without an object file path')
+                process.exit(-1)
             }
         }
 
@@ -120,10 +120,13 @@ async function run(): Promise<void> {
         const errorCount = result.diagnostics.filter((diag) => diag.type === 'error').length
         const warnCount = result.diagnostics.filter((diag) => diag.type === 'warn').length
 
-        logger.log('compileInfo', `Assembly of ${asmFile.path} ${errorCount ? 'failed' : 'finished'} with ${errorCount} ${errorCount === 1 ? 'error' : 'errors'} and ${warnCount} ${warnCount === 1 ? 'warning' : 'warnings'}`)
+        if (errorCount > 0) {
+            process.exit(-1)
+        }
     } catch (err) {
-        logger.log('compileCrash', `A fatal error occurred during assembly.\n${err.stack}`)
+        process.exit(-1)
     }
+    process.exit(0)
 }
 
 run()

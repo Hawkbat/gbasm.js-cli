@@ -36,7 +36,7 @@ G Trash the global checksum.`)
 
 if (!romPath) {
     console.error('No ROM file specified, exiting')
-    process.exit(1)
+    process.exit(-1)
 }
 
 async function run(): Promise<void> {
@@ -70,8 +70,9 @@ async function run(): Promise<void> {
 
         logger.log('compileInfo', `Fixing of ${romPath} finished`)
     } catch (err) {
-        logger.log('compileCrash', `A fatal error occurred during fixing.\n${err.stack}`)
+        process.exit(-1)
     }
+    process.exit(0)
 }
 
 run()

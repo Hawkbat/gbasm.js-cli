@@ -27,7 +27,7 @@ program
 
 if (!objectPaths.length) {
     console.error('No object files specified, exiting')
-    process.exit(1)
+    process.exit(-1)
 }
 
 async function run(): Promise<void> {
@@ -76,10 +76,14 @@ async function run(): Promise<void> {
         const errorCount = result.diagnostics.filter((diag) => diag.type === 'error').length
         const warnCount = result.diagnostics.filter((diag) => diag.type === 'warn').length
 
-        logger.log('compileInfo', `Linking ${errorCount ? 'failed' : 'finished'} with ${errorCount} ${errorCount === 1 ? 'error' : 'errors'} and ${warnCount} ${warnCount === 1 ? 'warning' : 'warnings'}`)
+
+        if (errorCount > 0) {
+            process.exit(-1)
+        }
     } catch (err) {
-        logger.log('compileCrash', `A fatal error occurred during linking.\n${err.stack}`)
+        process.exit(-1)
     }
+    process.exit(0)
 }
 
 run()
