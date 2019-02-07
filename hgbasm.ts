@@ -50,6 +50,13 @@ async function run(): Promise<void> {
                     // file does not exist or could not be accessed; continue
                 }
                 try {
+                    const filePath = pathUtil.resolve(pathUtil.dirname(sender.path), path)
+                    const file = await fs.readFile(filePath, binary ? 'binary' : 'utf8')
+                    return new gbasm.AsmFile(pathUtil.relative(rootFolder, filePath), file)
+                } catch (_) {
+                    // file does not exist or could not be accessed; continue
+                }
+                try {
                     const filePath = pathUtil.resolve(pathUtil.dirname(sourcePath), path)
                     const file = await fs.readFile(filePath, binary ? 'binary' : 'utf8')
                     return new gbasm.AsmFile(pathUtil.relative(rootFolder, filePath), file)
