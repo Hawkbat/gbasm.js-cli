@@ -31,11 +31,20 @@ if (!objectPaths.length) {
 }
 
 async function run(): Promise<void> {
-    const logger = new gbasm.Logger('info')
+    const logger = new gbasm.Logger({
+        log: (msg, type) => {
+            if (type === 'error' || type === 'fatal') {
+                process.stderr.write(msg)
+            } else {
+                process.stdout.write(msg)
+            }
+        },
+        allowAnsi: true
+    }, 'info')
     try {
         const objectFiles = objectPaths.map((path) => gbasm.readObjectFile(pathUtil.relative(rootFolder, path), fs.readFileSync(path)))
 
-        logger.log('compileInfo', `Linking ${objectFiles.map((obj) => obj.path).join(', ')}`)
+        logger.log('info', `Linking ${objectFiles.map((obj) => obj.path).join(', ')}\n`)
 
         const link = new gbasm.Linker(logger)
         const result = await link.link(new gbasm.LinkerContext({
@@ -62,25 +71,27 @@ async function run(): Promise<void> {
         }
 
         for (const diag of result.diagnostics.filter((d) => d.type === 'info')) {
-            logger.log('diagnosticInfo', diag.toString())
+            logger.log('info', `${diag}\n`)
         }
 
         for (const diag of result.diagnostics.filter((d) => d.type === 'warn')) {
-            logger.log('diagnosticWarn', diag.toString())
+            logger.log('warn', `${diag}\n`)
         }
 
         for (const diag of result.diagnostics.filter((d) => d.type === 'error')) {
-            logger.log('diagnosticError', diag.toString())
+            logger.log('error', `${diag}\n`)
         }
 
         const errorCount = result.diagnostics.filter((diag) => diag.type === 'error').length
         const warnCount = result.diagnostics.filter((diag) => diag.type === 'warn').length
 
+        logger.log('info', `Linking ${errorCount ? 'failed' : 'finished'} with ${errorCount} ${errorCount === 1 ? 'error' : 'errors'} and ${warnCount} ${warnCount === 1 ? 'warning' : 'warnings'}\n`)
 
         if (errorCount > 0) {
             process.exit(-1)
         }
     } catch (err) {
+        logger.log('fatal', `A fatal error occurred during linking.\n${err.stack}\n`)
         process.exit(-1)
     }
     process.exit(0)

@@ -40,9 +40,18 @@ if (!romPath) {
 }
 
 async function run(): Promise<void> {
-    const logger = new gbasm.Logger('info')
+    const logger = new gbasm.Logger({
+        log: (msg, type) => {
+            if (type === 'error' || type === 'fatal') {
+                process.stderr.write(msg)
+            } else {
+                process.stdout.write(msg)
+            }
+        },
+        allowAnsi: true
+    }, 'info')
     try {
-        logger.log('compileInfo', `Fixing ${romPath}`)
+        logger.log('info', `Fixing ${romPath}\n`)
 
         const romFile = fs.readFileSync(romPath)
 
@@ -68,8 +77,9 @@ async function run(): Promise<void> {
             fs.writeFileSync(romPath, result.romFile)
         }
 
-        logger.log('compileInfo', `Fixing of ${romPath} finished`)
+        logger.log('info', `Fixing of ${romPath} finished\n`)
     } catch (err) {
+        logger.log('fatal', `A fatal error occurred during fixing.\n${err.stack}\n`)
         process.exit(-1)
     }
     process.exit(0)
