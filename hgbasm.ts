@@ -3,6 +3,7 @@ import * as program from 'commander'
 import * as fs from 'fs-extra'
 import * as gbasm from 'hgbasm'
 import * as pathUtil from 'path'
+import { getHgbasmVersion } from './utils'
 
 const rootFolder: string = process.cwd()
 const includeFolders: string[] = []
@@ -96,6 +97,7 @@ async function run(): Promise<void> {
         const asm = new gbasm.Assembler(logger)
 
         const result = await asm.assemble(new gbasm.AssemblerContext(asm, {
+            version: getHgbasmVersion(),
             padding: program.padding !== undefined ? program.padding : 0x00,
             exportAllLabels: program.export !== undefined ? program.export : false,
             nopAfterHalt: program.haltNop !== undefined ? program.haltNop : true,
