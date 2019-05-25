@@ -24,7 +24,7 @@
   "dependencies": {
     "commander": "^2.19.0",
     "fs-extra": "^7.0.1",
-    "hgbasm": "^1.10.0"
+    "hgbasm": "^1.10.1"
   },
   "devDependencies": {
     "@types/fs-extra": "^5.0.4",
