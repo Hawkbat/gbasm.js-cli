@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import * as program from 'commander'
 import * as fs from 'fs-extra'
-import * as gbasm from 'hgbasm'
+import * as hgbasm from 'hgbasm'
 import * as pathUtil from 'path'
 
 const rootFolder: string = process.cwd()
@@ -31,7 +31,7 @@ if (!objectPaths.length) {
 }
 
 async function run(): Promise<void> {
-    const logger = new gbasm.Logger({
+    const logger = new hgbasm.Logger({
         log: (msg, type) => {
             if (type === 'error' || type === 'fatal') {
                 process.stderr.write(msg)
@@ -42,12 +42,12 @@ async function run(): Promise<void> {
         allowAnsi: true
     }, 'info')
     try {
-        const objectFiles = objectPaths.map((path) => gbasm.readObjectFile(pathUtil.relative(rootFolder, path), fs.readFileSync(path)))
+        const objectFiles = objectPaths.map((path) => hgbasm.readObjectFile(pathUtil.relative(rootFolder, path), fs.readFileSync(path)))
 
         logger.log('info', `Linking ${objectFiles.map((obj) => obj.path).join(', ')}\n`)
 
-        const link = new gbasm.Linker(logger)
-        const result = await link.link(new gbasm.LinkerContext({
+        const link = new hgbasm.Linker(logger)
+        const result = await link.link(new hgbasm.LinkerContext({
             disableRomBanks: program.romBank !== undefined ? !program.romBank : false,
             disableVramBanks: program.dmg !== undefined ? program.dmg : false,
             disableWramBanks: program.dmg !== undefined ? program.dmg : program.wramBank !== undefined ? !program.wramBank : false,

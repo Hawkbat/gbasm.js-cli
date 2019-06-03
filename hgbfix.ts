@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import * as program from 'commander'
 import * as fs from 'fs-extra'
-import * as gbasm from 'hgbasm'
+import * as hgbasm from 'hgbasm'
 
 let romPath = ''
 
@@ -40,7 +40,7 @@ if (!romPath) {
 }
 
 async function run(): Promise<void> {
-    const logger = new gbasm.Logger({
+    const logger = new hgbasm.Logger({
         log: (msg, type) => {
             if (type === 'error' || type === 'fatal') {
                 process.stderr.write(msg)
@@ -55,8 +55,8 @@ async function run(): Promise<void> {
 
         const romFile = fs.readFileSync(romPath)
 
-        const fixer = new gbasm.Fixer(logger)
-        const result = await fixer.fix(new gbasm.FixerContext({
+        const fixer = new hgbasm.Fixer(logger)
+        const result = await fixer.fix(new hgbasm.FixerContext({
             cgbCompatibility: program.cgbOnly ? 'cgb' : program.cgbCompatible ? 'both' : undefined,
             sgbCompatible: program.sgb,
             nintendoLogo: program.fixAll || program.fix.includes('l') ? 'fix' : program.fix.includes('L') ? 'trash' : undefined,
