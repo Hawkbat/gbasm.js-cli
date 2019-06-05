@@ -50,34 +50,26 @@ async function run(): Promise<void> {
         const asmFile = new hgbasm.AsmFile(pathUtil.relative(rootFolder, sourcePath), fs.readFileSync(sourcePath, 'utf8'))
         logger.log('info', `Assembling ${asmFile.path}\n`)
 
+        const fileCache: { [key: string]: hgbasm.AsmFile } = {}
+
         const provider: hgbasm.IFileProvider = {
             retrieve: async (path, sender, binary) => {
-                try {
-                    const filePath = pathUtil.resolve(rootFolder, path)
-                    const file = await fs.readFile(filePath, binary ? 'binary' : 'utf8')
-                    return new hgbasm.AsmFile(pathUtil.relative(rootFolder, filePath), file)
-                } catch (_) {
-                    // file does not exist or could not be accessed; continue
+                const filePaths = [
+                    pathUtil.resolve(rootFolder, path),
+                    pathUtil.resolve(pathUtil.dirname(sender.path), path),
+                    pathUtil.resolve(pathUtil.dirname(sourcePath), path),
+                    ...includeFolders.map((incPath) => pathUtil.resolve(incPath, path))
+                ]
+                const cachedPath = filePaths.find((filePath) => !!fileCache[filePath])
+                if (cachedPath) {
+                    return fileCache[cachedPath]
                 }
-                try {
-                    const filePath = pathUtil.resolve(pathUtil.dirname(sender.path), path)
-                    const file = await fs.readFile(filePath, binary ? 'binary' : 'utf8')
-                    return new hgbasm.AsmFile(pathUtil.relative(rootFolder, filePath), file)
-                } catch (_) {
-                    // file does not exist or could not be accessed; continue
-                }
-                try {
-                    const filePath = pathUtil.resolve(pathUtil.dirname(sourcePath), path)
-                    const file = await fs.readFile(filePath, binary ? 'binary' : 'utf8')
-                    return new hgbasm.AsmFile(pathUtil.relative(rootFolder, filePath), file)
-                } catch (_) {
-                    // file does not exist or could not be accessed; continue
-                }
-                for (const incPath of includeFolders) {
+                for (const filePath of filePaths) {
                     try {
-                        const filePath = pathUtil.resolve(incPath, path)
-                        const file = await fs.readFile(filePath, binary ? 'binary' : 'utf8')
-                        return new hgbasm.AsmFile(pathUtil.relative(rootFolder, filePath), file)
+                        const src = await fs.readFile(filePath, binary ? 'binary' : 'utf8')
+                        const file = new hgbasm.AsmFile(pathUtil.relative(rootFolder, filePath), src)
+                        fileCache[filePath] = file
+                        return file
                     } catch (_) {
                         // file does not exist or could not be accessed; continue
                     }
