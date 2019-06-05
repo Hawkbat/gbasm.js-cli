@@ -1,6 +1,6 @@
 {
   "name": "hgbasm-cli",
-  "version": "1.13.0",
+  "version": "1.14.9",
   "description": "A command-line wrapper around hgbasm which mirrors the RGBDS command-line utilities.",
   "main": "main.js",
   "scripts": {
