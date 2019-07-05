@@ -44,25 +44,24 @@ async function run(): Promise<void> {
     try {
         const objectFiles = objectPaths.map((path) => hgbasm.readObjectFile(pathUtil.relative(rootFolder, path), fs.readFileSync(path)))
 
-        logger.log('info', `Linking ${objectFiles.map((obj) => obj.path).join(', ')}\n`)
+        logger.logLine('info', `Linking ${objectFiles.map((obj) => obj.path).join(', ')}`)
+
+        const linkerScript = program.linkerscript ? fs.readFileSync(program.linkerscript, 'utf8') : ''
+        const overlay = program.overlay ? fs.readFileSync(program.overlay) : null
 
         const link = new hgbasm.Linker(logger)
         const result = await link.link(new hgbasm.LinkerContext({
             disableRomBanks: program.romBank !== undefined ? !program.romBank : false,
             disableVramBanks: program.dmg !== undefined ? program.dmg : false,
             disableWramBanks: program.dmg !== undefined ? program.dmg : program.wramBank !== undefined ? !program.wramBank : false,
-            linkerScript: program.linkerscript ? fs.readFileSync(program.linkerscript, 'utf8') : '',
-            generateSymbolFile: program.sym ? true : false,
-            generateMapFile: program.map ? true : false,
-            padding: program.pad !== undefined ? parseInt(program.pad) : 0x00,
-            overlay: program.overlay ? fs.readFileSync(program.overlay) : null
-        }, objectFiles))
+            padding: program.pad !== undefined ? parseInt(program.pad) : 0x00
+        }, objectFiles, linkerScript, overlay))
 
-        if (result.symbolFile) {
+        if (program.sym && result.symbolFile) {
             fs.writeFileSync(program.sym, result.symbolFile)
         }
 
-        if (result.mapFile) {
+        if (program.map && result.mapFile) {
             fs.writeFileSync(program.map, result.mapFile)
         }
 
@@ -71,27 +70,27 @@ async function run(): Promise<void> {
         }
 
         for (const diag of result.diagnostics.filter((d) => d.type === 'info')) {
-            logger.log('info', `${diag}\n`)
+            logger.logLine('info', diag.toString())
         }
 
         for (const diag of result.diagnostics.filter((d) => d.type === 'warn')) {
-            logger.log('warn', `${diag}\n`)
+            logger.logLine('warn', diag.toString())
         }
 
         for (const diag of result.diagnostics.filter((d) => d.type === 'error')) {
-            logger.log('error', `${diag}\n`)
+            logger.logLine('error', diag.toString())
         }
 
         const errorCount = result.diagnostics.filter((diag) => diag.type === 'error').length
         const warnCount = result.diagnostics.filter((diag) => diag.type === 'warn').length
 
-        logger.log('info', `Linking ${errorCount ? 'failed' : 'finished'} with ${errorCount} ${errorCount === 1 ? 'error' : 'errors'} and ${warnCount} ${warnCount === 1 ? 'warning' : 'warnings'}\n`)
+        logger.logLine('info', `Linking ${errorCount ? 'failed' : 'finished'} with ${errorCount} ${errorCount === 1 ? 'error' : 'errors'} and ${warnCount} ${warnCount === 1 ? 'warning' : 'warnings'}`)
 
         if (errorCount > 0) {
             process.exit(-1)
         }
     } catch (err) {
-        logger.log('fatal', `A fatal error occurred during linking.\n${err.stack}\n`)
+        logger.logLine('fatal', `A fatal error occurred during linking.\n${err.stack}`)
         process.exit(-1)
     }
     process.exit(0)

@@ -48,7 +48,7 @@ async function run(): Promise<void> {
     }, program.verbose ? 'trace' : 'info')
     try {
         const asmFile = new hgbasm.AsmFile(pathUtil.relative(rootFolder, sourcePath), fs.readFileSync(sourcePath, 'utf8'))
-        logger.log('info', `Assembling ${asmFile.path}\n`)
+        logger.logLine('info', `Assembling ${asmFile.path}`)
 
         const fileCache: { [key: string]: hgbasm.AsmFile } = {}
 
@@ -101,11 +101,11 @@ async function run(): Promise<void> {
         if (program.depfile) {
             if (program.out) {
                 const deps = result.dependencies
-                deps.unshift(pathUtil.relative(rootFolder, sourcePath))
+                deps.unshift({ path: pathUtil.relative(rootFolder, sourcePath), type: 'source' })
                 const lines = deps.map((d) => `${pathUtil.relative(rootFolder, program.out)}: ${d}`)
                 fs.writeFileSync(program.depfile, lines.join('\n'))
             } else {
-                logger.log('fatal', 'Cannot generate a dependency file without an object file path\n')
+                logger.logLine('fatal', 'Cannot generate a dependency file without an object file path')
                 process.exit(-1)
             }
         }
@@ -115,29 +115,29 @@ async function run(): Promise<void> {
         }
 
         for (const diag of result.diagnostics.filter((d) => d.type === 'info')) {
-            logger.log('info', `${diag}\n`)
+            logger.logLine('info', diag.toString())
         }
 
         if (!program.nowarn) {
             for (const diag of result.diagnostics.filter((d) => d.type === 'warn')) {
-                logger.log('warn', `${diag}\n`)
+                logger.logLine('warn', diag.toString())
             }
         }
 
         for (const diag of result.diagnostics.filter((d) => d.type === 'error')) {
-            logger.log('error', `${diag}\n`)
+            logger.logLine('error', diag.toString())
         }
 
         const errorCount = result.diagnostics.filter((diag) => diag.type === 'error').length
         const warnCount = result.diagnostics.filter((diag) => diag.type === 'warn').length
 
-        logger.log('info', `Assembly of ${asmFile.path} ${errorCount ? 'failed' : 'finished'} with ${errorCount} ${errorCount === 1 ? 'error' : 'errors'} and ${warnCount} ${warnCount === 1 ? 'warning' : 'warnings'}\n`)
+        logger.logLine('info', `Assembly of ${asmFile.path} ${errorCount ? 'failed' : 'finished'} with ${errorCount} ${errorCount === 1 ? 'error' : 'errors'} and ${warnCount} ${warnCount === 1 ? 'warning' : 'warnings'}`)
 
         if (errorCount > 0) {
             process.exit(-1)
         }
     } catch (err) {
-        logger.log('fatal', `A fatal error occurred during assembly.\n${err.stack}\n`)
+        logger.logLine('fatal', `A fatal error occurred during assembly.\n${err.stack}`)
         process.exit(-1)
     }
     process.exit(0)

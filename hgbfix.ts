@@ -51,7 +51,7 @@ async function run(): Promise<void> {
         allowAnsi: true
     }, 'info')
     try {
-        logger.log('info', `Fixing ${romPath}\n`)
+        logger.logLine('info', `Fixing ${romPath}`)
 
         const romFile = fs.readFileSync(romPath)
 
@@ -77,9 +77,9 @@ async function run(): Promise<void> {
             fs.writeFileSync(romPath, result.romFile)
         }
 
-        logger.log('info', `Fixing of ${romPath} finished\n`)
+        logger.logLine('info', `Fixing of ${romPath} finished`)
     } catch (err) {
-        logger.log('fatal', `A fatal error occurred during fixing.\n${err.stack}\n`)
+        logger.logLine('fatal', `A fatal error occurred during fixing.\n${err.stack}`)
         process.exit(-1)
     }
     process.exit(0)
