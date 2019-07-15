@@ -103,7 +103,7 @@ async function run(): Promise<void> {
                 const deps = result.dependencies
                 deps.unshift({ path: pathUtil.relative(rootFolder, sourcePath), type: 'source' })
                 const lines = deps.map((d) => `${pathUtil.relative(rootFolder, program.out)}: ${d.path}`)
-                fs.writeFileSync(program.depfile, lines.join('\n'))
+                fs.writeFileSync(program.depfile, `${lines.join('\n')}\n`)
             } else {
                 logger.logLine('fatal', 'Cannot generate a dependency file without an object file path')
                 process.exit(-1)
